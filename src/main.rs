@@ -1,5 +1,6 @@
 use lambda_extension::*;
 use tracing::info;
+use tracing_subscriber::filter::{EnvFilter, LevelFilter};
 {%- assign use_events = false -%}
 {%- if logs or telemetry -%}
     {%- if events -%}
@@ -62,7 +63,11 @@ async fn main() -> Result<(), Error> {
     // The runtime logging can be enabled here by initializing `tracing` with `tracing-subscriber`
     // While `tracing` is used internally, `log` can be used as well if preferred.
     tracing_subscriber::fmt()
-        .with_max_level(tracing::Level::INFO)
+        .with_env_filter(
+            EnvFilter::builder()
+                .with_default_directive(LevelFilter::INFO.into())
+                .from_env_lossy(),
+        )
         // disabling time is handy because CloudWatch will add the ingestion time.
         .without_time()
         .init();
